@@ -1,33 +1,27 @@
 let search = document.querySelector("#search");
 
 let animeList = [];
+let allAnime = [];
 
 let currentPage = 1;
-
 let animePerPage = 8;
 
 fetch("https://api.jikan.moe/v4/anime")
-
     .then(function(response) {
-
         return response.json();
-
     })
-
     .then(function(data) {
 
         animeList = data.data;
+        allAnime = data.data;
 
         showAnime();
-
     })
-
     .catch(function(error) {
 
         let animeContainer = document.querySelector("#anime-container");
 
         animeContainer.innerHTML = "<p>Unable to load anime. Please try again.</p>";
-
     });
 
 
@@ -38,31 +32,33 @@ function showAnime() {
     animeContainer.innerHTML = "";
 
     let start = (currentPage - 1) * animePerPage;
-
     let end = start + animePerPage;
 
     let pageAnime = animeList.slice(start, end);
 
+    if (pageAnime.length === 0) {
+
+        animeContainer.innerHTML = "<p>No anime found.</p>";
+
+        return;
+    }
+
     pageAnime.forEach(function(anime) {
 
         animeContainer.innerHTML += `
-
             <div class="anime-card" onclick="openDetails(${anime.mal_id})">
 
                 <img src="${anime.images.jpg.image_url}">
 
                 <h3>${anime.title}</h3>
 
-                <p>Year: ${anime.year}</p>
+                <p>Year: ${anime.year || "N/A"}</p>
 
             </div>
-
         `;
-
     });
 
     document.querySelector("#page-number").innerText = "Page " + currentPage;
-
 }
 
 
@@ -70,16 +66,14 @@ search.addEventListener("input", function() {
 
     let searchText = search.value.toLowerCase();
 
-    animeList = animeList.filter(function(anime) {
+    animeList = allAnime.filter(function(anime) {
 
         return anime.title.toLowerCase().includes(searchText);
-
     });
 
     currentPage = 1;
 
     showAnime();
-
 });
 
 
@@ -90,9 +84,7 @@ document.querySelector("#next").addEventListener("click", function() {
         currentPage++;
 
         showAnime();
-
     }
-
 });
 
 
@@ -103,14 +95,11 @@ document.querySelector("#prev").addEventListener("click", function() {
         currentPage--;
 
         showAnime();
-
     }
-
 });
 
 
 function openDetails(id) {
 
     window.location.href = `details.html?id=${id}`;
-
 }
